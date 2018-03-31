@@ -26,7 +26,7 @@ class ChannelList extends Component {
 
   render() {
     return (
-      <div className="ChannelList">
+      <div className="channel-list">
         {this.renderChannels()}
       </div>
     );
