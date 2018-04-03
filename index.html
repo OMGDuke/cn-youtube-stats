@@ -182,7 +182,7 @@
             <div className="add-channel">
               <form onSubmit={this.handleSubmit}>
                 <textarea className="add-channel__text" onChange={this.handleChange}/>
-                <button>Add Channel</button>
+                <button className="add-channel__submit">Add Channel</button>
               </form>
             </div>
           );
@@ -262,6 +262,13 @@
       .add-channel__text {
         height: 300px;
         width: 500px;
+      }
+
+      .add-channel__submit {
+        display: block;
+        margin: 30px auto;
+        height: 30px;
+        width: 200px;
       }
 
 
