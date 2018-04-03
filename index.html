@@ -32,7 +32,6 @@
           super(props)
           this.state = {
             channels: [],
-            filteredChannels: [],
             categories: [],
             sortType: 'Select',
             filter: 'Select'
@@ -47,14 +46,14 @@
             const categories = Array.from(new Set(response.data.map(channel => channel.yt_category)));
             this.setState({
               channels: response.data,
-              filteredChannels: response.data,
               categories: categories
             });
           });
         }
 
         renderChannels() {
-          return this.state.filteredChannels.map(channel => <Channel key={channel.channel_id} channelData={channel} />)
+          const filteredChannels = this.filterChannels();
+          return filteredChannels.map(channel => <Channel key={channel.channel_id} channelData={channel} />)
         }
 
         renderCategories() {
@@ -71,12 +70,12 @@
         }
 
         sortChannels(type) {
-          let channels = [...this.state.filteredChannels];
+          let channels = [...this.state.channels];
           channels.sort((a,b) => a.stats[type[0]] - b.stats[type[0]]);
           if(type[1] === 'descending') {
             channels.reverse();
           }
-          this.setState({filteredChannels: channels});
+          this.setState({channels: channels});
         }
 
         handleFilterChange(event) {
@@ -85,34 +84,45 @@
 
         filterChannels() {
           if(this.state.filter === 'Select') {
-            this.setState({filteredChannels: this.state.channels})
+            return this.state.channels;
           } else {
             const filteredChannels = this.state.channels.filter(channel => channel.yt_category === this.state.filter);
-            this.setState({filteredChannels: filteredChannels})
+            return filteredChannels
           }
+        }
+
+        addChannel(channelData) {
+          const channelJson = JSON.parse(channelData);
+
         }
 
         render() {
           return (
             <div className="channel-list">
-                <label htmlFor="subscribers">Sort by Subscribers</label>
-                <select name="subscribers" value={this.state.sortType} onChange={this.handleSortChange}>
-                  <option value={undefined}>Select</option>
-                  <option value="subscribers-ascending">Ascending</option>
-                  <option value="subscribers-descending">Descending</option>
-                </select>
-                <label htmlFor="views">Sort by Views</label>
-                <select name="views" value={this.state.sortType} value={this.state.sortType} onChange={this.handleSortChange}>
-                  <option value={undefined}>Select</option>
-                  <option value="views-ascending">Ascending</option>
-                  <option value="views-descending">Descending</option>
-                </select>
-                <label htmlFor="categories">Filter by Category</label>
-                <select name="categories" value={this.state.filter} onChange={this.handleFilterChange}>
-                  <option value={undefined}>Select</option>
-                  {this.renderCategories()}
-                </select>
+              <form className="channel-list__toggles">
+                <label className="channel-list__sorting">Sort by Subscribers
+                  <select name="subscribers" value={this.state.sortType} onChange={this.handleSortChange}>
+                    <option value="Select">Select</option>
+                    <option value="subscribers-ascending">Ascending</option>
+                    <option value="subscribers-descending">Descending</option>
+                  </select>
+                </label>
+                <label className="channel-list__sorting">Sort by Views
+                  <select name="views" value={this.state.sortType} value={this.state.sortType} onChange={this.handleSortChange}>
+                    <option value="Select">Select</option>
+                    <option value="views-ascending">Ascending</option>
+                    <option value="views-descending">Descending</option>
+                  </select>
+                </label>
+                <label className="channel-list__sorting">Filter by Category
+                  <select name="categories" value={this.state.filter} onChange={this.handleFilterChange}>
+                    <option value="Select">Select</option>
+                    {this.renderCategories()}
+                  </select>
+                </label>
+              </form>
               {this.renderChannels()}
+              <AddChannel addChannel={this.addChannel}/>
             </div>
           );
         }
@@ -137,6 +147,37 @@
               <div className="lorem">
                 <span className="lorem__text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sodales.</span>
               </div>
+            </div>
+          );
+        }
+      }
+
+      class AddChannel extends React.Component {
+        constructor(props) {
+          super(props);
+          this.state = {
+            newChannel: ''
+          }
+          this.handleSubmit = this.handleSubmit.bind(this);
+          this.handleChange = this.handleChange.bind(this);
+        }
+
+        handleChange(event) {
+          this.setState({newChannel: event.target.value});
+        }
+
+        handleSubmit(event) {
+          event.preventDefault();
+          this.props.addChannel(this.state.newChannel);
+        }
+
+        render() {
+          return (
+            <div className="add-channel">
+              <form onSubmit={this.handleSubmit}>
+                <textarea onChange={this.handleChange}/>
+                <button>Add Channel</button>
+              </form>
             </div>
           );
         }
@@ -169,6 +210,14 @@
 
       .channel-list {
         text-align: center;
+      }
+
+      .channel-list__toggles {
+        padding: 20px;
+      }
+
+      .channel-list__sorting {
+        margin: 10px;
       }
 
       .channel {
