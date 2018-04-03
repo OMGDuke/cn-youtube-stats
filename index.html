@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="theme-color" content="#000000">
+    <title>Creator Ninja</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.21.1/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.js"></script>
+
+    <script type="text/babel">
+      class App extends React.Component {
+        render() {
+          return (
+            <div className="App">
+              <header className="App-header">
+                <h1 className="App-title">Creator Ninja</h1>
+              </header>
+              <ChannelList />
+            </div>
+          );
+        }
+      }
+
+      class ChannelList extends React.Component {
+        constructor(props) {
+          super(props)
+          this.state = {
+            channels: [],
+            categories: [],
+            sortType: '',
+            filter: ''
+          }
+          this.handleSortChange = this.handleSortChange.bind(this);
+          this.handleFilterChange = this.handleFilterChange.bind(this);
+        }
+
+        componentDidMount() {
+          const channelsUrl = 'https://gist.githubusercontent.com/aldoninja/b77dd051aadc90598119e51b9030566b/raw/aa225e1bb8478bf517b4215808e29ae69b975702/top-10-channels.json';
+          axios.get(channelsUrl).then(response => {
+            const categories = Array.from(new Set(response.data.map(channel => channel.yt_category)));
+            this.setState({
+              channels: response.data,
+              categories: categories
+            });
+          });
+        }
+
+        renderChannels () {
+
+          return this.state.channels.map(channel => <Channel key={channel.channel_id} channelData={channel} />)
+        }
+
+        renderCategories () {
+          return this.state.categories.map(category => <option key={category} value={category}>{category.charAt(0).toUpperCase() + category.slice(1)}</option>)
+        }
+
+        handleSortChange(event) {
+          this.setState({sortType: event.target.value});
+          this.state.channels.sort(function(a,b) {return (a.stats[event.target.value] > b.stats[event.target.value]) ? 1 : ((b.stats[event.target.value] > a.stats[event.target.value]) ? -1 : 0);} );
+        }
+
+        handleFilterChange(event) {
+          this.setState({filter: event.target.value});
+        }
+
+        render() {
+          return (
+            <div className="channel-list">
+                <label htmlFor="subscribers">Sort by Subscribers</label>
+                <select name="subscribers" value={this.state.sortType} onChange={this.handleSortChange}>
+                  <option value={undefined}>Select</option>
+                  <option value="subsAscending">Ascending</option>
+                  <option value="subsDescending">Descending</option>
+                </select>
+                <label htmlFor="views">Sort by Views</label>
+                <select name="views" value={this.state.sortType} value={this.state.sortType} onChange={this.handleSortChange}>
+                  <option value={undefined}>Select</option>
+                  <option value="viewsAscending">Ascending</option>
+                  <option value="viewsDescending">Descending</option>
+                </select>
+                <label htmlFor="categories">Filter by Category</label>
+                <select name="categories" value={this.state.filter} onChange={this.handleFilterChange}>
+                  {this.renderCategories()}
+                </select>
+                sortType: {this.state.sortType}
+              {this.renderChannels()}
+            </div>
+          );
+        }
+      }
+
+      class Channel extends React.Component {
+        formatNumber(value) {
+            const suffixes = ["", "k", "m", "b","t"];
+            const suffixNum = Math.floor(("" + value).length/3);
+            let shortValue = parseFloat((suffixNum !== 0 ? (value / Math.pow(1000,suffixNum)) : value).toPrecision(2));
+            return shortValue + suffixes[suffixNum];
+        }
+
+        render() {
+          const channel = this.props.channelData;
+          return (
+            <div className="channel">
+              <img className="channel__thumbnail" src={channel.thumbnail_url} alt={`${channel.display_name} logo`}/>
+              <a className="channel__name" href={`https://www.youtube.com/channel/${channel.channel_id}`} target="_blank">{channel.display_name}</a>
+              <span className="channel__stats">Subscribers: </span><span className="channel__stats">{this.formatNumber(channel.stats.subscribers)}</span>
+              <span className="channel__stats">Views: </span><span className="channel__stats">{this.formatNumber(channel.stats.views)}</span>
+              <div className="lorem">
+                <span className="lorem__text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sodales.</span>
+              </div>
+            </div>
+          );
+        }
+      }
+
+      ReactDOM.render(
+        <App />,
+        document.getElementById('root')
+      );
+    </script>
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: sans-serif;
+      }
+
+      .App-header {
+        text-align: center;
+        background-color: #222;
+        height: 150px;
+        padding: 20px;
+        color: white;
+      }
+
+      .App-title {
+        font-size: 1.5em;
+      }
+
+      .channel-list {
+        text-align: center;
+      }
+
+      .channel {
+        display: inline-block;
+        padding: 20px 0;
+        text-align: left;
+        border-top: 1px solid #e3e3e3;
+      }
+      .channel__thumbnail {
+        height: 120px;
+        float: left;
+        margin-right: 20px;
+        border-radius: 50%;
+      }
+
+      .channel__name {
+        display: block;
+      }
+
+      .channel__stats {
+        margin-right: 20px;
+      }
+      .lorem {
+        background: #f4f4f4;
+        display: inline-block;
+        line-height: 40px;
+        height: 40px;
+        width: 70%;
+        margin-top: 20px;
+      }
+      .lorem__text {
+        margin: 20px;
+      }
+
+
+    </style>
+  </body>
+</html>
