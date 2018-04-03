@@ -62,43 +62,24 @@
         }
 
         handleSortChange(event) {
-          console.log(event.target.value)
           this.setState({sortType: event.target.value}, this.chooseSortType);
         }
 
         chooseSortType() {
           const sortType = this.state.sortType.split('-');
-          console.log(sortType)
-          if(sortType[0] === 'subs') {
-            this.sortBySubs(sortType[1]);
-          } else if(sortType[0] === 'views') {
-            this.sortByViews(sortType[1])
-          }
+          this.sortChannels(sortType);
         }
 
-        sortBySubs(order) {
-          console.log('called')
+        sortChannels(type) {
           let channels = [...this.state.filteredChannels];
-          console.log(channels[0])
-          channels.sort((a,b) => a.stats.subscribers - b.stats.subscribers);
-          console.log(channels[0])
-          if(order === 'descending') {
-            channels.reverse();
-          }
-          this.setState({filteredChannels: channels});
-        }
-
-        sortByViews(order) {
-          let channels = [...this.state.filteredChannels];
-          channels.sort((a,b) => a.stats.views - b.stats.views);
-          if(order === 'descending') {
+          channels.sort((a,b) => a.stats[type[0]] - b.stats[type[0]]);
+          if(type[1] === 'descending') {
             channels.reverse();
           }
           this.setState({filteredChannels: channels});
         }
 
         handleFilterChange(event) {
-          console.log(event.target.value)
           this.setState({filter: event.target.value}, this.filterChannels);
         }
 
@@ -117,8 +98,8 @@
                 <label htmlFor="subscribers">Sort by Subscribers</label>
                 <select name="subscribers" value={this.state.sortType} onChange={this.handleSortChange}>
                   <option value={undefined}>Select</option>
-                  <option value="subs-ascending">Ascending</option>
-                  <option value="subs-descending">Descending</option>
+                  <option value="subscribers-ascending">Ascending</option>
+                  <option value="subscribers-descending">Descending</option>
                 </select>
                 <label htmlFor="views">Sort by Views</label>
                 <select name="views" value={this.state.sortType} value={this.state.sortType} onChange={this.handleSortChange}>
