@@ -38,6 +38,7 @@
           }
           this.handleSortChange = this.handleSortChange.bind(this);
           this.handleFilterChange = this.handleFilterChange.bind(this);
+          this.addChannel = this.addChannel.bind(this);
         }
 
         componentDidMount() {
@@ -92,7 +93,12 @@
         }
 
         addChannel(channelData) {
-          const channelJson = JSON.parse(channelData);
+          try {
+            const channelJson = JSON.parse(channelData);
+            this.setState({channels:[...this.state.channels, channelJson]});
+          } catch (e) {
+            window.alert('Error: Please enter a channel as valid JSON');
+          }
 
         }
 
@@ -175,7 +181,7 @@
           return (
             <div className="add-channel">
               <form onSubmit={this.handleSubmit}>
-                <textarea onChange={this.handleChange}/>
+                <textarea className="add-channel__text" onChange={this.handleChange}/>
                 <button>Add Channel</button>
               </form>
             </div>
@@ -228,6 +234,7 @@
       }
       .channel__thumbnail {
         height: 120px;
+        width: 120px;
         float: left;
         margin-right: 20px;
         border-radius: 50%;
@@ -250,6 +257,11 @@
       }
       .lorem__text {
         margin: 20px;
+      }
+
+      .add-channel__text {
+        height: 300px;
+        width: 500px;
       }
 
 
